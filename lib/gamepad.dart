@@ -1,11 +1,11 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:control_pad/models/gestures.dart';
 import 'package:control_pad/models/pad_button_item.dart';
 import 'package:flutter_blue/flutter_blue.dart';
-import 'bluetooth.dart';
 import 'package:control_pad/control_pad.dart';
 import 'package:gamepad/models/gamepadStatement.dart';
 import 'widgets/joypad.dart';
@@ -31,118 +31,84 @@ class GamePadPage extends StatefulWidget {
 }
 class _GamePadState extends State<GamePadPage>{
   GamePadStatement gameState = new GamePadStatement();
+  writeData(BluetoothCharacteristic characteristic, String data) async{
+   List<int> bytes = utf8.encode(data);
+   await characteristic.write(bytes);
+  }
+
+  void createChargerIcons(){
+
+  }
   @override
   Widget build(BuildContext context) {
     SystemChrome.setPreferredOrientations(
         [DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
-    /*
-    JoystickDirectionCallback onDirectionChanged(double degrees, double distance){
-      // print("Degree : ${degrees.toStringAsFixed(2)} , distance : ${distance.toStringAsFixed(2)}");
-      print();
-    }*/
 
     JoyPadCallback onDirectionChanged(Offset delta) {
-      print(delta);
+      gameState.velocityNormal = delta.dx;
+      gameState.velocityAngular = delta.dy;
     }
 
     PadButtonPressedCallback padButtonPressedCallback(int buttonIndex, Gestures gesture){
-      gameState.gamePadButtonB = buttonIndex == 0 && gesture == Gestures.TAP ? true : false;
-      gameState.gamePadButtonA = buttonIndex == 1 && gesture == Gestures.TAP ? true : false;
-      gameState.gamePadButtonX = buttonIndex == 2 && gesture == Gestures.TAP ? true : false;
-      gameState.gamePadButtonY = buttonIndex == 3 && gesture == Gestures.TAP ? true : false;
+      if(buttonIndex == 0){
+        if (gesture == Gestures.TAPDOWN) {
+          gameState.gamePadButtonB = true;
+        } else {
+          gameState.gamePadButtonB = false;
+        }
+      }
+      if(buttonIndex == 1){
+        if (gesture == Gestures.TAPDOWN) {
+          gameState.gamePadButtonA = true;
+        } else {
+          gameState.gamePadButtonA = false;
+        }
+      }
+      if(buttonIndex == 2){
+        if (gesture == Gestures.TAPDOWN) {
+          gameState.gamePadButtonX = true;
+        } else {
+          gameState.gamePadButtonX = false;
+        }
+      }
+      if(buttonIndex == 3){
+        if (gesture == Gestures.TAPDOWN) {
+          gameState.gamePadButtonY = true;
+        } else {
+          gameState.gamePadButtonY = false;
+        }
+      }
     }
-    if(widget.device != null ){
-      Timer.periodic(new Duration(seconds: 2), (timer)=>{
-        debugPrint(timer.toString())
-      });
-    }
+    new Timer.periodic(Duration(seconds: 2),(Timer t) async {
+      String json = jsonEncode(gameState);
+      print(json);
+      if(widget.device != null){
+        List<BluetoothService> services = await widget.device.discoverServices();
+        services.forEach((service){
+          var characteristics = service.characteristics;
+          for(BluetoothCharacteristic c in characteristics){
+            writeData(c, gameState.toString());
+          }
+        });
+      }
+    });
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      drawer: Drawer(
-      child:ListView(
-        padding: EdgeInsets.zero,
-        children: <Widget>[
-          DrawerHeader(
-            child: Text('Menu'),
-            decoration: BoxDecoration(color: Colors.blue),
-          ),
-          ListTile(
-            title: Text('GamePad'),
-            onTap: () => {
-            },
-          ),
-          ListTile(
-            title: Text('Devices List'),
-            onTap: () => {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => BluetoothList(title: 'Devices List',)))
-            },
-          ),
-        ],
-      ) ,
-    ),
       body: Center(
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
-            //JoystickView(onDirectionChanged: onDirectionChanged),
             Joypad(onDirectionChanged: onDirectionChanged),
-            Expanded(
-              flex: 2,
-              child: Container(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: <Widget>[
-                  GestureDetector(
-                    onTapDown: (TapDownDetails details){
-                      setState(() {
-                        gameState.gamePadButtonSelect = true;
-                      });
-                    },
-                    onTapCancel: (){
-                      setState(() {
-                        gameState.gamePadButtonSelect = false;
-                      });
-                    },
-                    child: 
-                      FloatingActionButton(
-                        heroTag: "select",
-                        onPressed: () => {},
-                        child: Icon(Icons.aspect_ratio),
-                        backgroundColor: Colors.black26,
-                      ),
-                  ),
-                  GestureDetector(
-                    onTapDown: (TapDownDetails details){
-                      setState(() {
-                        gameState.gamePadButtonSelect = true;
-                      });
-                    },
-                    onTapCancel: (){
-                      setState(() {
-                        gameState.gamePadButtonSelect = false;
-                      });
-                    },
-                    child: 
-                      FloatingActionButton(
-                        heroTag: "start",
-                        onPressed: () => {},
-                        child: Icon(Icons.list),
-                        backgroundColor: Colors.black26,
-                      )
-                  ),
-                ],
-              ),
-            ),
-            ),
             PadButtonsView(
               padButtonPressedCallback: padButtonPressedCallback,
               buttons: const [
-                PadButtonItem(index: 0, buttonText: 'KICK', backgroundColor: Colors.red),
-                PadButtonItem(index: 1, buttonText: 'ChipKick', backgroundColor: Colors.green),
-                PadButtonItem(index: 2, buttonText: 'X', backgroundColor: Colors.lightBlue),
-                PadButtonItem(index: 3, buttonText: 'DRIBBLE', backgroundColor: Colors.yellowAccent)
+                PadButtonItem(index: 0, buttonText: 'KICK', backgroundColor: Colors.red, supportedGestures: [Gestures.TAPDOWN, Gestures.TAPCANCEL]),
+                PadButtonItem(index: 1, buttonText: 'ChipKick', backgroundColor: Colors.green,  supportedGestures: [Gestures.TAPDOWN, Gestures.TAPCANCEL]),
+                PadButtonItem(index: 2, buttonText: 'X', backgroundColor: Colors.lightBlue, supportedGestures: [Gestures.TAPDOWN, Gestures.TAPCANCEL]),
+                PadButtonItem(index: 3, buttonText: 'DRIBBLE', backgroundColor: Colors.yellowAccent, supportedGestures: [Gestures.TAPDOWN, Gestures.TAPCANCEL])
               ]
             ) ,
           ],

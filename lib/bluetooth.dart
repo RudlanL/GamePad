@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'gamepad.dart';
@@ -22,7 +20,6 @@ class BluetoothList extends StatefulWidget {
 
 class _BluetoothListState extends State<BluetoothList> {
 
-  List<BluetoothService> services;
   BluetoothDevice connectedDevice;
   bool isScanning = false;
   bool isConnected = false;
@@ -62,10 +59,6 @@ class _BluetoothListState extends State<BluetoothList> {
    }
    return buildListViewOfDevices(context);
  }
- writeData(BluetoothCharacteristic characteristic,String data) async{
-   List<int> bytes = utf8.encode(data);
-   await characteristic.write(bytes);
- }
  ListView buildConnectDeviceView() {
    return ListView(
      padding: const EdgeInsets.all(8),
@@ -91,7 +84,7 @@ class _BluetoothListState extends State<BluetoothList> {
              ),
              FlatButton(
                color: Colors.blue,
-               child: isConnected ? Text(""): Text(
+               child: connectedDevice != null && connectedDevice.id == device.id ? Icon(Icons.check,size: 24,):Text(
                  'Connect',
                  style: TextStyle(color: Colors.white),
                ),
@@ -103,17 +96,6 @@ class _BluetoothListState extends State<BluetoothList> {
                     throw e;
                   }finally{
                     showAlertDialog(context, device.name);
-                    services = await device.discoverServices();
-                    services.forEach((service){
-                      var characteristics = service.characteristics;
-                      for(BluetoothCharacteristic c in characteristics){
-                        writeData(c, "Alllllllo");
-                      }
-                    });
-                    /*connectedDevice = device;
-                    services.forEach((service) => {
-                      print('Hallooooo');
-                    });*/
                   }
                },
              ),
@@ -156,30 +138,14 @@ class _BluetoothListState extends State<BluetoothList> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back,color: Colors.white,),
+          onPressed: ()=>{
+            widget.flutterBlue.stopScan(),
+            Navigator.of(context).pop()
+          },
+        ),
       ),
-      drawer: Drawer(
-      child:ListView(
-        padding: EdgeInsets.zero,
-        children: <Widget>[
-          DrawerHeader(
-            child: Text('Menu'),
-            decoration: BoxDecoration(color: Colors.blue),
-          ),
-          ListTile(
-            title: Text('GamePad'),
-            onTap: () => {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => GamePadPage(title: 'GamePad',device: connectedDevice)))
-            },
-          ),
-          ListTile(
-            title: Text('Devices List'),
-            onTap: () => {
-              
-            },
-          ),
-        ],
-      ) ,
-    ),
       body: FlutterBlue.instance.isOn == null ? Center(child: Text("Bluetooth Off"),): buildView(context),
     );
   }
