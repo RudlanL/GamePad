@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:control_pad/models/gestures.dart';
@@ -6,10 +8,11 @@ import 'package:flutter_blue/flutter_blue.dart';
 import 'bluetooth.dart';
 import 'package:control_pad/control_pad.dart';
 import 'package:gamepad/models/gamepadStatement.dart';
+import 'widgets/joypad.dart';
 
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title, this.device}) : super(key: key);
+class GamePadPage extends StatefulWidget {
+  GamePadPage({Key key, this.title, this.device}) : super(key: key);
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -26,15 +29,20 @@ class MyHomePage extends StatefulWidget {
   @override
   _GamePadState createState() => _GamePadState();
 }
-class _GamePadState extends State<MyHomePage>{
+class _GamePadState extends State<GamePadPage>{
   GamePadStatement gameState = new GamePadStatement();
   @override
   Widget build(BuildContext context) {
     SystemChrome.setPreferredOrientations(
         [DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
-
+    /*
     JoystickDirectionCallback onDirectionChanged(double degrees, double distance){
-      print("Degree : ${degrees.toStringAsFixed(2)} , distance : ${distance.toStringAsFixed(2)}");
+      // print("Degree : ${degrees.toStringAsFixed(2)} , distance : ${distance.toStringAsFixed(2)}");
+      print();
+    }*/
+
+    JoyPadCallback onDirectionChanged(Offset delta) {
+      print(delta);
     }
 
     PadButtonPressedCallback padButtonPressedCallback(int buttonIndex, Gestures gesture){
@@ -42,6 +50,11 @@ class _GamePadState extends State<MyHomePage>{
       gameState.gamePadButtonA = buttonIndex == 1 && gesture == Gestures.TAP ? true : false;
       gameState.gamePadButtonX = buttonIndex == 2 && gesture == Gestures.TAP ? true : false;
       gameState.gamePadButtonY = buttonIndex == 3 && gesture == Gestures.TAP ? true : false;
+    }
+    if(widget.device != null ){
+      Timer.periodic(new Duration(seconds: 2), (timer)=>{
+        debugPrint(timer.toString())
+      });
     }
     return Scaffold(
       appBar: AppBar(
@@ -73,7 +86,8 @@ class _GamePadState extends State<MyHomePage>{
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            JoystickView(onDirectionChanged: onDirectionChanged),
+            //JoystickView(onDirectionChanged: onDirectionChanged),
+            Joypad(onDirectionChanged: onDirectionChanged),
             Expanded(
               flex: 2,
               child: Container(

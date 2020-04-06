@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -132,7 +131,12 @@ class _BluetoothListState extends State<BluetoothList> {
    );
  }
  showAlertDialog(BuildContext context, String name){
-   Widget okBtn = FlatButton(child: Text('OK'),onPressed: () => {},);
+   Widget okBtn = FlatButton(
+      child: Text('OK'),
+     onPressed: () => {
+       Navigator.push(context, MaterialPageRoute(builder: (context) => GamePadPage(title: 'GamePad',device: connectedDevice)))
+     },
+    );
    showDialog(
      context: context,
      builder: (BuildContext context) {
@@ -164,7 +168,7 @@ class _BluetoothListState extends State<BluetoothList> {
           ListTile(
             title: Text('GamePad'),
             onTap: () => {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => MyHomePage(title: 'GamePad',device: connectedDevice)))
+              Navigator.push(context, MaterialPageRoute(builder: (context) => GamePadPage(title: 'GamePad',device: connectedDevice)))
             },
           ),
           ListTile(
