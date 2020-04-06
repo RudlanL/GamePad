@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:gamepad/menu.dart';
 import 'gamepad.dart';
 
 void main() => runApp(MyApp());
@@ -13,7 +14,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: GamePadPage(title: 'Gamepad',),
+      home: MainMenu(title: 'Menu'),
     );
   }
 }
