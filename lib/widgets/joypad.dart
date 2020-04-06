@@ -15,10 +15,10 @@ class Joypad extends StatefulWidget {
   JoypadState createState() => JoypadState();
 }
 
-class JoypadState extends State {
+class JoypadState extends State<Joypad> {
+
   Offset delta = Offset.zero;
   double actualSize = 0;
-
   bool isLeft = false;
   bool isRight = false;
 
@@ -92,6 +92,7 @@ class JoypadState extends State {
   }
 
   void _processGesture(Offset delta) {
-    print("DIRECTION :${delta.dx}");
+    widget.onDirectionChanged(delta);
+    print(delta);
   }
 }
