@@ -30,7 +30,8 @@ class _MainMenuState extends State<MainMenu>{
               height: 50.0,
               width: MediaQuery.of(context).size.width * 0.60,
               child: RaisedButton(
-                child: Text('GamePad'),
+                color: Colors.lightBlue,
+                child: Text('GamePad', style: TextStyle(color: Colors.white),),
                 onPressed: ()=>{
                   Navigator.push(context, MaterialPageRoute(builder: (context) => GamePadPage(title: 'GamePad')))
                 },
@@ -40,10 +41,11 @@ class _MainMenuState extends State<MainMenu>{
               height: 50,
               width: MediaQuery.of(context).size.width * 0.60,
               child: RaisedButton(
+                color: Colors.lightBlue,
                 onPressed: ()=>{
                   Navigator.push(context, MaterialPageRoute(builder: (context) => BluetoothList(title: 'Devices List')))
                 },
-                child: Text('Devices List'),
+                child: Text('Devices List', style: TextStyle(color: Colors.white),),
               ),
             ),
           ],
