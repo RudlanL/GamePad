@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gamepad/menu.dart';
-import 'gamepad.dart';
 
 void main() => runApp(MyApp());
 class MyApp extends StatelessWidget {
