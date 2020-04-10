@@ -1,6 +1,6 @@
 # gamepad
 
-[!homepage](https://i.imgur.com/VYsYkCh.png| width=600)
+<img src="https://i.imgur.com/VYsYkCh.png" width="600">
 
 ## Build Setup
 
